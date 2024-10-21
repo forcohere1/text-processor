@@ -1,0 +1,370 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent body from scrolling */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.upload-section {
+    padding: 10px;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+
+.viewer-editor {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+}
+
+.viewer, .editor {
+    height: 100%;
+    overflow: auto;
+}
+
+.viewer {
+    background-color: #f5f5f5;
+    overflow: hidden;
+}
+
+.viewer iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.editor {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.scroll-container {
+    height: 100%;
+    overflow: auto; /* Enable both vertical and horizontal scrolling */
+}
+
+#ckeditor {
+    width: auto; /* Changed from min-width: 100% to auto */
+    white-space: normal; /* Allow wrapping for better resizing */
+    box-sizing: border-box;
+}
+
+.ck-editor__editable {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+}
+
+/* Styling the draggable divider (gutter) */
+.gutter {
+    background-color: #ddd;
+    cursor: col-resize;
+    width: 5px;
+}
+
+.gutter.gutter-horizontal {
+    cursor: ew-resize;
+}
+
+.ck.ck-editor__editable_inline {
+    overflow: visible !important; /* Allow overflow to support dynamic resizing */
+}
+
+.page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 10px auto;
+    padding: 20mm;
+    background: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    page-break-after: always;
+}
+
+@media print {
+    .page {
+        box-shadow: none;
+        page-break-after: always;
+    }
+}
+
+#loadingSpinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8); /* Optional overlay background */
+    z-index: 9999;
+    text-align: center;
+    pointer-events: none; /* Ensure that loading spinner doesn't interfere with interactions */
+}
+
+.spinner-container {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid black;
+    border-right: 8px solid black;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingText {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Shared button styles */
+#clearEditorButton, 
+#exportButton, 
+.upload-left button, 
+.upload-left input[type="file"] {
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+/* Hover effect for buttons */
+#clearEditorButton:hover, 
+#exportButton:hover, 
+.upload-left button:hover, 
+.upload-left input[type="file"]:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.upload-section {
+    padding: 5px 15px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 100%;
+}
+
+.upload-left {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-right: 15px;
+    max-width: 100%;
+}
+
+.upload-right {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    margin-left: 10px;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.upload-right input,
+.upload-right button {
+    flex: 1;
+    padding: 5px 10px;
+    font-size: 14px;
+    max-width: 100%;
+    box-sizing: border-box; /* Ensures input/button don't overflow */
+}
+
+.upload-right input[type="text"] {
+    max-width: 250px;
+    width: 100%;
+}
+
+.upload-right #currentFile {
+    flex: 2;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .upload-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .upload-left,
+    .upload-right {
+        flex: 1;
+        justify-content: center;
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .upload-right {
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+        max-width: 100%;
+    }
+
+    .upload-right #currentFile {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-right input[type="text"] {
+        max-width: 100%;
+    }
+
+    .upload-section {
+        padding: 5px 10px;
+    }
+
+    .upload-left,
+    .upload-right {
+        max-width: 100%;
+    }
+
+    .upload-left button, 
+    .upload-left input[type="file"], 
+    .upload-right button {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    #clearEditorButton,
+    #exportButton {
+        width: 100%;
+    }
+}
+
+/* Info icon (retained original design) */
+.info-icon {
+    margin-left: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    color: #000000; /* Black color for the icon */
+    border: 1px solid #c2c4c6; /* Circle border */
+    border-radius: 50%; /* Makes the border round */
+    padding: 2px 6px; /* Adjusts size of the circle */
+    display: inline-block;
+    text-align: center;
+}
+
+.info-icon:hover {
+    color: #bacce0;
+    border-color: #bacce0;
+}
+
+/* Checkbox and label styling */
+label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    margin-top: 10px;
+    padding-left: 8px;
+    flex-wrap: wrap;
+}
+
+label input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #999;
+    border-radius: 2px;
+    outline: none;
+    margin-right: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+label input[type="checkbox"]:checked {
+    background-color: #000000;
+    border-color: #000000;
+}
+
+label input[type="checkbox"]:checked::before {
+    content: "✔";
+    color: white;
+    font-size: 12px;
+    position: absolute;
+    top: -2px;
+    left: 2px;
+}
+
+@media (max-width: 768px) {
+    label {
+        justify-content: space-between;
+        font-size: 13px;
+    }
+
+    .info-icon {
+        font-size: 12px; /* Slightly smaller on smaller screens */
+        padding: 2px 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    label {
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 12px;
+        padding-left: 0;
+    }
+
+    label input[type="checkbox"] {
+        margin-bottom: 5px;
+    }
+
+    .info-icon {
+        margin-top: 5px;
+    }
+}
+
+.ck-content table, .ck-content table td, .ck-content table th {
+    width: auto !important; /* Force auto width for table columns */
+    min-width: 50px !important; /* Ensure a minimum column width */
+    max-width: none !important; /* Prevent any max-width limitations */
+    box-sizing: border-box !important;
+}

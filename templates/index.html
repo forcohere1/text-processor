@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Viewer and Editor</title>
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ckeditor.css') }}">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.2.0/ckeditor5.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="static/fonts/NotoSans-Regular.js"></script>
+    <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+
+        <div class="upload-section">
+            <div class="upload-left">
+                <input type="file" id="fileInput" accept=".docx,.doc,.pdf">
+                <button id="uploadButton">Upload</button>
+                <label>
+                    <input type="checkbox" id="viewerCheckbox"> Only Update Viewer
+                    <span class="info-icon" title="Check this box to upload the document only to update the viewer on the left, keeping the editor unchanged.">ℹ️</span>
+                </label>
+            </div>
+            <div class="upload-right">
+                <input type="text" id="authorName" placeholder="Enter Author's Name">
+                <span id="currentFile">Currently Editing: None</span>
+                <button id="clearEditorButton" onclick="confirmClearEditor()">Clear Editor</button>
+                <button id="exportButton" onclick="exportToPDF()">Export as PDF</button>
+            </div>
+        </div>
+
+        <div id="loadingSpinner" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <p id="loadingText">Loading... Please wait.</p>
+            </div>
+        </div>
+
+        <div class="viewer-editor" id="split-viewer-editor">
+            <div class="viewer">
+                <iframe id="documentViewer" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+            <div class="editor">
+                <div class="main-container">
+                    <div class="editor-container editor-container_classic-editor editor-container_include-style" id="editor-container">
+                        <div class="editor-container__editor">
+                            <div id="editor"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import custom CKEditor build with importmap -->
+    <script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/43.2.0/ckeditor5.js",
+            "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/43.2.0/"
+        }
+    }
+    </script>
+
+    <!-- Main script for CKEditor initialization -->
+    <script type="module" src="{{ url_for('static', filename='ckeditor.js') }}"></script>
+
+    <script>
+        // Add event listener to the Upload button
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            const viewerCheckbox = document.getElementById('viewerCheckbox');
+            if (viewerCheckbox.checked) {
+                importLeftViewerDocument();  // Function to update viewer
+            } else {
+                uploadDocument();  // Function to update editor
+            }
+        });
+
+        // Initialize Split.js for the viewer and editor with a draggable divider
+        Split(['.viewer', '.editor'], {
+            sizes: [50, 50],  // Initial split size percentages
+            minSize: 200,  // Minimum size of each pane
+            gutterSize: 5,  // Size of the draggable divider
+            cursor: 'col-resize',  // Cursor style when hovering over the divider
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

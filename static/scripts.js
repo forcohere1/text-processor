@@ -64,19 +64,52 @@ function exportToPDF() {
         return;
     }
 
+    // Function to process cell content while respecting order
+    function processCellContent(content) {
+        const cellDiv = document.createElement('div');
+        cellDiv.innerHTML = content;
+
+        const cellLines = [];
+
+        // Process each child node in the order they appear
+        cellDiv.childNodes.forEach(node => {
+            if (node.nodeName === 'OL') {
+                // Handle ordered lists <ol>
+                let listIndex = 1;
+                node.querySelectorAll('li').forEach(li => {
+                    cellLines.push(`${listIndex}. ${li.innerText.trim()}`);
+                    listIndex++;
+                });
+            } else if (node.nodeName === 'UL') {
+                // Handle unordered lists <ul>
+                node.querySelectorAll('li').forEach(li => {
+                    cellLines.push(`• ${li.innerText.trim()}`);
+                });
+            } else if (node.nodeName === 'P' || node.nodeName === '#text') {
+                // Handle paragraphs and plain text nodes
+                const text = node.innerText || node.textContent || '';
+                if (text.trim()) {
+                    cellLines.push(text.trim());
+                }
+            }
+        });
+
+        return cellLines.join('\n'); // Join with newline characters to preserve formatting
+    }
+
     // First, draw the table content without footer
     tables.forEach((table, index) => {
         const body = [];
         const header = [];
 
         table.querySelectorAll('thead th').forEach(th => {
-            header.push(th.innerText);
+            header.push(processCellContent(th.innerHTML));
         });
 
         table.querySelectorAll('tbody tr').forEach(tr => {
             const row = [];
             tr.querySelectorAll('td').forEach(td => {
-                row.push(td.innerText);
+                row.push(processCellContent(td.innerHTML));
             });
             body.push(row);
         });

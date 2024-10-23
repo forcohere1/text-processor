@@ -130,6 +130,90 @@ function exportToPDF() {
     pdf.save(pdfFileName);
 }
 
+function exportVisibleToPDF() {
+    const editorContent = editorInstance.getData();
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    pdf.setFont("NotoSans-Regular", "normal");
+
+    const authorName = document.getElementById("authorName").value;
+    const currentISTTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    const currentFileName = localStorage.getItem('currentFileName') || 'document';
+
+    // Get only visible rows from the table
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(editorContent, 'text/html');
+    const tables = doc.querySelectorAll('table');
+
+    if (tables.length === 0) {
+        alert('No tables found to export.');
+        return;
+    }
+
+    tables.forEach((table, index) => {
+        const body = [];
+        const header = [];
+
+        // Capture headers
+        table.querySelectorAll('thead th').forEach(th => {
+            header.push(th.innerText);
+        });
+
+        // Capture only visible rows
+        table.querySelectorAll('tbody tr').forEach(tr => {
+            if (tr.style.display !== 'none') {  // Only include visible rows
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => {
+                    row.push(td.innerText);
+                });
+                body.push(row);
+            }
+        });
+
+        if (body.length > 0) {
+            pdf.autoTable({
+                head: [header],
+                body: body,
+                startY: index === 0 ? 10 : pdf.autoTable.previous.finalY + 10,
+                styles: {
+                    font: 'NotoSans-Regular',
+                    lineWidth: 0.1,
+                    lineColor: [0, 0, 0]
+                },
+                tableLineWidth: 0.1,
+                tableLineColor: [0, 0, 0],
+                theme: 'grid',
+                columnStyles: {
+                    0: { cellWidth: 10 }, 
+                    1: { cellWidth: 10 },  
+                    2: { cellWidth: 45 },  
+                    3: { cellWidth: 75 },  
+                    4: { cellWidth: 20 },  
+                }
+            });
+        }
+    });
+
+    // Add footer details to each page (like timestamp and author)
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        pdf.setFontSize(10);
+        pdf.text(`Generated: ${currentISTTime}`, 10, pageHeight - 10);
+        pdf.text(`Page ${i}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+        if (authorName) {
+            pdf.text(`Author: ${authorName}`, pageWidth - 40, pageHeight - 10);
+        }
+    }
+
+    // Save the PDF
+    const pdfFileName = currentFileName.replace(/\.[^/.]+$/, "") + '_filtered.pdf'; // Add _visible to the filename
+    pdf.save(pdfFileName);
+}
+
 function uploadDocument() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];

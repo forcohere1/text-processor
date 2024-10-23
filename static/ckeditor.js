@@ -25,6 +25,7 @@ import {
 	IndentBlock,
 	Italic,
 	Link,
+	List,
 	Paragraph,
 	RemoveFormat,
 	SelectAll,
@@ -93,6 +94,9 @@ const editorConfig = {
 			'|',
 			'alignment',
 			'|',
+			'bulletedList', 
+			'numberedList',
+			'|',
 			'outdent',
 			'indent'
 		],
@@ -124,6 +128,7 @@ const editorConfig = {
 		IndentBlock,
 		Italic,
 		Link,
+		List,
 		Paragraph,
 		RemoveFormat,
 		SelectAll,
@@ -290,21 +295,52 @@ let editorInstance;
 
 // Create the editor and assign it to editorInstance
 ClassicEditor.create(document.querySelector('#editor'), editorConfig)
-	.then(editor => {
-		window.editorInstance = editor;  // Assign the editor instance to the global window object
+    .then(editor => {
+        window.editorInstance = editor;  // Assign the editor instance to the global window object
 
-		// Set up auto-save to local storage on data change
-		editor.model.document.on('change:data', () => {
-			const editorContent = window.editorInstance.getData();  // Use window.editorInstance
-			localStorage.setItem("editorContent", editorContent);
-		});
+        // Set up auto-save to local storage on data change
+        editor.model.document.on('change:data', () => {
+            const editorContent = window.editorInstance.getData();  // Use window.editorInstance
+            localStorage.setItem("editorContent", editorContent);
+        });
 
-		// Load editor content from local storage if available
-		const savedEditorContent = localStorage.getItem("editorContent");
-		if (savedEditorContent) {
-			window.editorInstance.setData(savedEditorContent);  // Use window.editorInstance
-		}
-	})
-	.catch(error => {
-		console.error('Error initializing CKEditor:', error);
-	});
+        // Load editor content from local storage if available
+        const savedEditorContent = localStorage.getItem("editorContent");
+        if (savedEditorContent) {
+            window.editorInstance.setData(savedEditorContent);  // Use window.editorInstance
+        }
+
+        // ADD: Table filtering logic here
+        const filterInput = document.getElementById('tableFilterInput');  // Get filter input field
+        
+        if (filterInput) {
+            filterInput.addEventListener('input', function () {
+                const filterValue = filterInput.value.toLowerCase();
+
+                // Get all tables inside the editor content
+                const editorContentDOM = new DOMParser().parseFromString(editor.getData(), 'text/html');
+                const tables = editorContentDOM.querySelectorAll('table');
+
+                tables.forEach(table => {
+                    const rows = table.querySelectorAll('tbody tr');
+                    
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+
+                        if (rowText.includes(filterValue)) {
+                            row.style.display = '';  // Show the row if it matches the filter value
+                        } else {
+                            row.style.display = 'none';  // Hide the row if it doesn't match the filter value
+                        }
+                    });
+                });
+
+                // After filtering, update the editor content with the modified table
+                editor.setData(editorContentDOM.documentElement.innerHTML);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error initializing CKEditor:', error);
+    });

@@ -368,3 +368,62 @@ label input[type="checkbox"]:checked::before {
     max-width: none !important; /* Prevent any max-width limitations */
     box-sizing: border-box !important;
 }
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown button */
+.dropbtn {
+    cursor: pointer;
+    padding: 5px 10px; /* Match padding used in other buttons */
+    font-size: 14px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%; /* Ensures it is as wide as needed */
+    box-sizing: border-box;
+}
+
+/* Hover effect for the dropdown button */
+.dropbtn:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Dropdown content (hidden by default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    right: 0; /* Aligns the dropdown content to the right edge of the button */
+}
+
+/* Buttons inside the dropdown */
+.dropdown-content button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: white;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dropdown-content button:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show the dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}

@@ -28,14 +28,19 @@
                     <span class="info-icon" title="Check this box to upload the document only to update the viewer on the left, keeping the editor unchanged.">ℹ️</span>
                 </label>
             </div>
-            <div class="upload-right">
+            <div class="upload-right" >
                 <input type="text" id="authorName" placeholder="Enter Author's Name">
                 <span id="currentFile">Currently Editing: None</span>
                 <button id="clearEditorButton" onclick="confirmClearEditor()">Clear Editor</button>
-                <button id="exportButton" onclick="exportToPDF()">Export as PDF</button>
+                <div class="dropdown">
+                    <button id="exportButton">Export PDF</button>
+                    <div class="dropdown-content">
+                        <button id="exportButton" onclick="exportToPDF()">Export Full PDF</button>
+                        <button id="exportButton" onclick="exportVisibleToPDF()">Export Filtered PDF</button>
+                    </div>
+                </div>
             </div>
         </div>
-
         <div id="loadingSpinner" style="display: none;">
             <div class="spinner-container">
                 <div class="spinner"></div>
@@ -50,6 +55,9 @@
             <div class="editor">
                 <div class="main-container">
                     <div class="editor-container editor-container_classic-editor editor-container_include-style" id="editor-container">
+                        <div class="search-table-section">
+                            <input type="text" id="tableFilterInput" placeholder="Filter table...">
+                        </div>
                         <div class="editor-container__editor">
                             <div id="editor"></div>
                         </div>

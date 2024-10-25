@@ -1,10 +1,13 @@
 # Use an official Python runtime as a parent image
 FROM python:3.11-slim
 
-# Install LibreOffice (for DOCX to HTML conversion) and clean up
+# Install dependencies for OCR, libreoffice, and clean up
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libreoffice libreoffice-writer && \
-    apt-get clean && \
+    apt-get install -y --no-install-recommends \
+    libreoffice libreoffice-writer \
+    ghostscript tesseract-ocr \
+    tesseract-ocr-hin tesseract-ocr-guj tesseract-ocr-san \
+    && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container

@@ -3,6 +3,9 @@ import subprocess
 from flask import Flask, request, render_template, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from pdf2docx import Converter
+import ocrmypdf
+import fitz  # PyMuPDF
+from docx import Document
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "uploads"
@@ -17,6 +20,16 @@ ALLOWED_EXTENSIONS = {'docx', 'doc', 'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def pdf_to_docx_text_extraction(pdf_path, docx_path):
+    # Initialize a new DOCX document
+    doc = Document()
+    with fitz.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf):
+            text = page.get_text("text")  # Extract searchable text
+            if text.strip():  # Ensure there's text to add
+                doc.add_paragraph(f"Page {page_num + 1}\n{text}")
+    doc.save(docx_path)
 
 @app.route('/')
 def index():
@@ -54,10 +67,14 @@ def upload():
                 ]
                 subprocess.run(convert_command, check=True)
             elif filename.endswith('.pdf'):
-                # Convert PDF to DOCX using pdf2docx with layout preservation for tables
-                cv = Converter(file_path)
-                cv.convert(docx_file_path, start=0, end=None, layout='exact')  # Preserve layout better
-                cv.close()
+                try:
+                    # Perform OCR on the PDF and overwrite with a searchable version
+                    ocrmypdf.ocr(file_path, file_path, language='eng', force_ocr=True, output_type='pdf')
+                except Exception as ocr_error:
+                    return jsonify({"error": f"Error making PDF searchable: {str(ocr_error)}"}), 500
+                
+                # Convert PDF to DOCX using text extraction to ensure searchability
+                pdf_to_docx_text_extraction(file_path, docx_file_path)
 
             # Use the converted .docx file for further processing
             file_path = docx_file_path

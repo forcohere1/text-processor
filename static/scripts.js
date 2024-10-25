@@ -268,6 +268,10 @@ function uploadDocument() {
     const formData = new FormData();
     formData.append('document', file);
 
+    // Check the OCR checkbox status and append it to formData
+    const ocrCheckbox = document.getElementById('ocrCheckbox');
+    formData.append('ocrCheckbox', ocrCheckbox.checked ? 'on' : 'off');
+
     document.getElementById('loadingSpinner').style.display = 'block';
 
     let loadingText = document.getElementById('loadingText');
@@ -298,7 +302,6 @@ function uploadDocument() {
             fetch(data.html_url)
                 .then(response => response.text())
                 .then(documentHtml => {
-                    console.log("Document HTML fetched:", documentHtml);
 
                     localStorage.setItem("viewerContent", documentHtml);
 

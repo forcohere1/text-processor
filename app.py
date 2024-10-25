@@ -51,6 +51,9 @@ def upload():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     document.save(file_path)
 
+    # Check the OCR checkbox value from the form data
+    ocr_enabled = request.form.get('ocrCheckbox') == 'on'
+
     # Convert .doc and .pdf to .docx if needed
     if filename.endswith('.doc') or filename.endswith('.pdf'):
         docx_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename.rsplit('.', 1)[0] + '.docx')
@@ -67,15 +70,20 @@ def upload():
                 ]
                 subprocess.run(convert_command, check=True)
             elif filename.endswith('.pdf'):
-                try:
-                    # Perform OCR on the PDF and overwrite with a searchable version
-                    ocrmypdf.ocr(file_path, file_path, language='eng', force_ocr=True, output_type='pdf')
-                except Exception as ocr_error:
-                    return jsonify({"error": f"Error making PDF searchable: {str(ocr_error)}"}), 500
-                
-                # Convert PDF to DOCX using text extraction to ensure searchability
-                pdf_to_docx_text_extraction(file_path, docx_file_path)
-
+                # Only apply OCR if the checkbox is checked
+                if ocr_enabled:
+                    try:
+                        # Perform OCR on the PDF and overwrite with a searchable version
+                        ocrmypdf.ocr(file_path, file_path, language='eng', force_ocr=True, output_type='pdf')
+                    except Exception as ocr_error:
+                        return jsonify({"error": f"Error making PDF searchable: {str(ocr_error)}"}), 500
+                    # Convert PDF to DOCX using text extraction to ensure searchability
+                    pdf_to_docx_text_extraction(file_path, docx_file_path)
+                else:
+                    # Convert PDF to DOCX using pdf2docx with layout preservation for tables
+                    cv = Converter(file_path)
+                    cv.convert(docx_file_path, start=0, end=None, layout='exact')  # Preserve layout better
+                    cv.close()
             # Use the converted .docx file for further processing
             file_path = docx_file_path
         except Exception as e:

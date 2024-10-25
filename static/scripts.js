@@ -431,6 +431,9 @@ function importLeftViewerDocument() {
 
     const formData = new FormData();
     formData.append('document', file);
+    // Check the OCR checkbox status and append it to formData
+    const ocrCheckbox = document.getElementById('ocrCheckbox');
+    formData.append('ocrCheckbox', ocrCheckbox.checked ? 'on' : 'off');
 
     document.getElementById('loadingSpinner').style.display = 'block';
 
